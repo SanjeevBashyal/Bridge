@@ -1,0 +1,31 @@
+<svg id="prefix__Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" width="189" height="168.125">
+    <defs>
+        <style>
+            .prefix__cls-1 {
+                fill: #00f
+            }
+        </style>
+        <defs>
+    <linearGradient id="hue" x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0%" stop-color="#ff0000"/>
+        <stop offset="17%" stop-color="#ffff00"/>
+        <stop offset="34%" stop-color="#00ff00"/>
+        <stop offset="50%" stop-color="#00ffff"/>
+        <stop offset="66%" stop-color="#0000ff"/>
+        <stop offset="82%" stop-color="#ff00ff"/>
+        <stop offset="100%" stop-color="#ff0000"/>
+    </linearGradient>
+    <linearGradient id="grad1" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:hsl(0,100%,50%);stop-opacity:1" />
+      <stop offset="100%" style="stop-color:hsl(150,100%,50%);stop-opacity:1" />
+    </linearGradient>
+  </defs>
+    </defs>
+    <path
+        d="M504 263v168h86a10.414 10.414 0 00-9-10h-59a9.493 9.493 0 01-5-2 9.822 9.822 0 01-3.5-6.5V282a10.443 10.443 0 018.25-8.25H577a11.675 11.675 0 008-3.75 11.517 11.517 0 002.875-7.125zM693 263v168h-86a10.414 10.414 0 019-10h59a9.493 9.493 0 005-2 9.822 9.822 0 003.5-6.5V282a10.443 10.443 0 00-8.25-8.25H620a11.675 11.675 0 01-8-3.75 11.517 11.517 0 01-2.875-7.125z"
+        transform="translate(-504 -262.875)" 
+        fill="url(#hue)"/>
+    <path
+        d="M558.4 294.3v98.4h99.2a17.567 17.567 0 00-4-5.6 18.73 18.73 0 00-12-4.8h-60.8a14.385 14.385 0 01-8-4.8 14.593 14.593 0 01-3.2-10.4v-62.4a15.793 15.793 0 00-11.2-10.4z"
+        transform="translate(-504 -262.875)" fill="#000000" />
+</svg>

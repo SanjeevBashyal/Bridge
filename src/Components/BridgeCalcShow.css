@@ -1,0 +1,8 @@
+.calcShow{
+    text-align: center;
+}
+
+.calcShow > table{
+    margin-left: auto;
+    margin-right: auto;
+}

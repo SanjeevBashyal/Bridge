@@ -1,0 +1,15 @@
+.bridgeDesign{
+    position: absolute;
+    top:10%;
+    width:100%;
+    text-align: center;
+}
+
+.bridgeDesign > a > img{
+    height: 50px;
+    width: 50px;
+    border: 1px solid black;
+    border-radius: 50%;
+}
+
+
