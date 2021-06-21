@@ -1,226 +1,174 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import BridgeCalcShow from './BridgeCalcShow';
 import bridge from '../img/bridge.svg';
+import SSTB_D from './SSTB_D';
 import './BridgeInput.css'
 
 const BridgeInput = () => {
 
-    const sagCalc=(EA,l,bd,h,gd,g,lf)=>{
-        let bi=bd;
-        let gi=gd;
-        if(lf==0){
-            return [[[1,bi,gi,bi,0]],bi];
-        }else if (lf==1){
-            bi=0.93*bd;
-        }else if (lf==2){
-            bi=1.22*bd;
-        }
-        let Ld=lengthCalc(l,h,bd);
-        let out=[];
-        let i=1;
-        let delg=g-gi;
-        do {
-            let row=[];
-            row.push(i);
-            row.push(bi);
-            gi=(64*EA)/(3*(l**3)*Ld)*bi*(bi**2-bd**2)+(bi/bd)*gd;
-            row.push(gi);
-            bi=bd+(bi-bd)*(g-gd)/(gi-gd);
-            row.push(bi);
-            delg=g-gi;
-            row.push(delg);
-            out.push(row);
-            i=i+1;
-        }while(Math.abs(delg)>0.001);
-        return [out, bi];
-
-    }
-
-    const lengthCalc=(l,h,b)=>{
-        return l*(1+(8/3)*(b/l)**2+(1/2)*(h/l)**2);
-    }
-    
-    const geometryCalc=(b,h,l)=>{
-        let A=(4*b)/(l**2);
-        let B=(h-4*b)/l;
-        let eA=(-B)/(2*A);
-        let eB=l-eA;
-        let bA=yCalc(A,B,eA);
-        let bB=bA-h;
-        let thetaA=Math.atan((4*b-h)/l)*180/Math.PI;
-        let thetaB=Math.atan((4*b+h)/l)*180/Math.PI;
-        return [A.toFixed(6)+"x^2"+B.toFixed(6)+"x",eA,eB,bA,bB,thetaA,thetaB];
-
-    }
-    const yCalc=(A,B,x)=>{
-        return A*x**2+B*x;
-    }
-
-    const loadCalc=(WW,HL,l)=>{
-        let DL_add=null;
-        if (WW==70){
-            DL_add=0.41;
-        }else if (WW==106){
-            DL_add=0.56;
-        }
-        let DL=HL+DL_add;
-
-        let LL=null;
-        if (l<=50){
-            LL=4;
-        }else if (l>50){
-            LL=3+50/l;
-        }
-        let WL=0.6;
-        let FL=DL+LL+WL;
-
-        return [DL,HL,FL];
-
-    }
-
-    const tensionCalc=(g,l,b,theta)=>{
-        let H=(g*l**2)/(8*b);
-        let T=H/Math.cos(theta*Math.PI/180);
-        return [H,T];
-    }
-
-    const cableIdentifier=(WW,l)=>{
-        if (WW==70){
-            if (l<=50){
-                return [2,26,2,26,10.04];
-            }
-            if (l<=90){
-                return [2,26,2,32,12.62];
-            }
-            if (l<=100){
-                return [2,26,4,26,15.06];
-            }
-            if (l<=120){
-                return [2,26,4,32,20.22];
-            }
-        }else if (WW==106){
-            if (l<=40){
-                return [2,26,2,26,10.04];
-            }
-            if (l<=60){
-                return [2,26,2,32,12.62];
-            }
-            if (l<=75){
-                return [2,26,4,26,15.06];
-            }
-            if (l<=105){
-                return [2,26,4,32,20.22];
-            }
-            if (l<=120){
-                return [2,32,4,32,22.80];
-            }
+    const collectData=(type)=>{
+        if (type===1){
+            let designer=document.getElementById("designer").value;
+            let AL=document.getElementById("A").value;
+            let AType=document.getElementById("leftGround").value;
+            let ATower=document.getElementById("leftTower").value;
+            let BL=document.getElementById("B").value;
+            let BType=document.getElementById("rightGround").value;
+            let BTower=document.getElementById("rightTower").value;
+            let l=document.getElementById("Span").value;
+            let WW=document.getElementById("walkway").value;
+            ReactDOM.render(
+                <SSTB_D designer={designer} AL={AL} AType={AType} ATower={ATower} BL={BL} BType={BType} BTower={BTower} l={l} WW={WW} />,
+              document.getElementById('bridge')
+            );
         }
     }
 
-    const areaCalc=(ls)=>{
-        let TA=null;
-        let BL=null;
-        let i=1;
-        for(i=1;i<=2;i++){
-            let area=null;
-            let bl=null;
-            let cs=ls[2*i-1];
-            if(cs==13){
-                area=73;
-                bl=103;
-            }else if (cs==26){
-                area=292;
-                bl=386;
-            }else if (cs==32){
-                area=442;
-                bl=585;
-            }else if (cs==36){
-                area=560;
-                bl=740;
-            }else if (cs==40){
-                area=691;
-                bl=914;
-            }
-            TA+=ls[2*(i-1)]*area;
-            BL+=ls[2*(i-1)]*bl;
+    const towerType=(position,towerList)=>{
+        let groundLocation=position+"Ground";
+        let groundType=parseInt(document.getElementById(groundLocation).value);
+        if (groundType===1){
+            towerInput(position, [2.4,3.4,4.4]);
         }
-        return [TA,BL];
+        else if (groundType===2){
+            towerInput(position, [2.4]);
+        }
+        else if (groundType===3){
+            towerInput(position, [2.0]);
+        }
+
     }
 
-    const calculate=()=>{
-        let designer=document.getElementById("designer").value;
-        let AL=parseFloat(document.getElementById("A").value);
-        let BL=parseFloat(document.getElementById("B").value);
-        let l=parseFloat(document.getElementById("Span").value);
-        let WW=document.getElementById("walkway").value;
-        
-        // let warnings=[];
-        let b=null;
-        if(l<80){
-            b=l/20;
-        }else{
-            b=l/22;
-        }
-        let h=(BL-AL);
-        
-        let cables=cableIdentifier(WW,l);
-        let HL=cables[4]*9.81/1000;
-        let AB=areaCalc(cables);
-        let Area=AB[0];
-        let PL=AB[1];
-        let LC=loadCalc(WW,HL,l);
-        let lf=[0,1,2];
-        let EA=110*Area;
-        let i=1;
-        let out=[];
-        // console.log(EA);
-        for(i=0;i<3;i++){
-            let row={};
-            row.l=l;
-            row.biter=sagCalc(EA,l,b,h,LC[0],LC[i],lf[i]);
-            row.h=h;
-            row.b=row.biter[1];
-            row.geometry=geometryCalc(row.b,h,l);
-            if(h>=0){
-                row.theta=row.geometry[6];
-            }else{
-                row.theta=row.geometry[5];
-            }
-            row.g=LC[i];
-            row.tension=tensionCalc(row.g,l,row.b,row.theta);
-            row.safety=PL/row.tension[1];
-            out.push(row);
-        }
-        // console.log(out);
+    const towerInput=(position,towerList)=>{
+        let towerLocation=position+"Tower";
+        let positionTowerInput=towerLocation+"Input";
         ReactDOM.render(
-              <BridgeCalcShow designer={designer} data={out} />,
-            document.getElementById('bridge')
-          );
+            <div>
+                <label>Tower Height:</label>
+                <select defaultValue="0" name={towerLocation} id={towerLocation}>
+                <option value="0" disabled></option>
+                {
+                    towerList.map((row)=>(
+                        <option key={row} value={row}>{row+"m"}</option>
+                    )
+
+                    )
+                }
+                </select>
+            </div>,
+          document.getElementById(positionTowerInput)
+        );
+    }
 
 
+    const typeInput=()=>{
+        let bridge_type=parseInt(document.getElementById("bridgeType").value);
+
+        if(bridge_type===1){
+            ReactDOM.render(
+                <div className="bridgeInput">
+                    <div className="leftRight" style={{width:'80%',float:'left',marginLeft:'10%',marginRight:'10%'}}>
+                        <div className="leftInput" style={{float:'left'}}>
+                            <label>Left Bank Ground Elevation: </label>
+                            <input type="number" id="A"/><br/>
+                            <label>Left Bank Ground Type: </label>
+                            <select onChange={()=>{towerType("left")}} defaultValue="0" name="leftGround" id="leftGround">
+                                <option value="0" disabled></option>
+                                <option value="1">Soil (Flat)</option>
+                                <option value="2">Soil (Slope)</option>
+                                <option value="3">Rock</option>
+                            </select><br/>
+                            <div id="leftTowerInput"></div>
+                        </div>
+                        <div className="rightInput" style={{float:'right'}}>
+                            <label>Right Bank Ground Elevation: </label>
+                            <input type="number" id="B"/><br/>
+                            <label>Right Bank Ground Elevation: </label>
+                            <select onChange={()=>{towerType("right")}} defaultValue="0" name="rightGround" id="rightGround">
+                                <option value="0" disabled></option>
+                                <option value="1">Soil (Flat)</option>
+                                <option value="2">Soil (Slope)</option>
+                                <option value="3">Rock</option>
+                            </select><br/>
+                            <div id="rightTowerInput"></div>
+                        </div>
+                    </div>
+                    <div className="spanInput">
+                    <label>Span: </label>
+                        <input type="number" id="Span"/><br/>
+                        <label>Walkway Width: </label>
+                        <select defaultValue="0" name="Walkway" id="walkway">
+                            <option value="0" disabled></option>
+                            <option value="70">70 cm</option>
+                            <option value="106">106 cm</option>
+                        </select><br/><br/>
+                        <button onClick={()=>{collectData(1)}}>Calculate</button>
+                    </div>
+                </div>,
+            document.getElementById('bridgeTypeInput')
+            );
+        }
+        else if (bridge_type===3){
+            ReactDOM.render(
+                <div className="bridgeInput">
+                    <div className="leftRight" style={{width:'80%',float:'left',marginLeft:'10%',marginRight:'10%'}}>
+                        <div className="leftInput" style={{float:'left'}}>
+                            <label>Left Bank Ground Elevation: </label>
+                            <input type="number" id="A"/><br/>
+                            <label>Left Bank Ground Type: </label>
+                            <select onChange={()=>{towerType("left")}} defaultValue="0" name="leftGround" id="leftGround">
+                                <option value="0" disabled></option>
+                                <option value="1">Soil (Flat)</option>
+                                <option value="2">Soil (Slope)</option>
+                                <option value="3">Rock</option>
+                            </select><br/>
+                            <div id="leftTowerInput"></div>
+                        </div>
+                        <div className="rightInput" style={{float:'right'}}>
+                            <label>Right Bank Ground Elevation: </label>
+                            <input type="number" id="B"/><br/>
+                            <label>Right Bank Ground Elevation: </label>
+                            <select onChange={()=>{towerType("right")}} defaultValue="0" name="rightGround" id="rightGround">
+                                <option value="0" disabled></option>
+                                <option value="1">Soil (Flat)</option>
+                                <option value="2">Soil (Slope)</option>
+                                <option value="3">Rock</option>
+                            </select><br/>
+                            <div id="rightTowerInput"></div>
+                        </div>
+                    </div>
+                    <div className="spanInput">
+                    <label>Span: </label>
+                        <input type="number" id="Span"/><br/>
+                        <label>Walkway Width: </label>
+                        <select defaultValue="0" name="Walkway" id="walkway">
+                            <option value="0" disabled></option>
+                            <option value="70">70 cm</option>
+                            <option value="106">106 cm</option>
+                        </select><br/><br/>
+                        <button onClick={()=>{collectData(3)}}>Calculate</button>
+                    </div>
+                </div>,
+            document.getElementById('bridgeTypeInput')
+            );
+        }
 
     }
 
     return (
         <div className="bridgeDesign">
-            <a href="/"><img src={bridge} alt="Bridge" title="Bridge"/></a><br/>
+            <a href="/"><img src={bridge} alt="Bridge" title="Bridge"/></a><br/><br/>
             <label id="designerLabel">Designer: </label>
-            <input type="text" id="designer"/>
-            <div className="bridgeInput">
-                <label>RL Bridge Axis Station A: </label>
-                <input type="number" id="A"/><br/>
-                <label>RL Bridge Axis Station B: </label>
-                <input type="number" id="B"/><br/>
-                <label>Span: </label>
-                <input type="number" id="Span"/><br/>
-                <label>Walkway Width: </label>
-                <select name="Walkway" id="walkway">
-                    <option value="70">70 cm</option>
-                    <option value="106">106 cm</option>
-                </select><br/>
-            </div>
-            <button onClick={calculate}>Calculate</button>
+            <input type="text" id="designer"/><br/>
+            <label>Bridge Type: </label>
+            <select onChange={typeInput} defaultValue="0" name="Bridge Type" id="bridgeType">
+                <option value="0" disabled></option>
+                <option value="1">SSTB D</option>
+                <option value="2">SSTB N</option>
+                <option value="3">LSTB D</option>
+                <option value="4">LSTB N</option>
+            </select><br/><br/>
+            <div id="bridgeTypeInput"></div>
             <div id="bridge"></div>
         </div>
         
