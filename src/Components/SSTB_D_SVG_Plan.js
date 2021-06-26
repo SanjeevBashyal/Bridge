@@ -10,7 +10,7 @@ const SSTB_D_SVG_Plan = (props) => {
     }
 
     const refreshSVG=()=>{
-        console.log(rSVG);
+        // console.log(rSVG);
         let a=rSVG-0.001;
         setrSVG(a);
     }
@@ -20,7 +20,6 @@ const SSTB_D_SVG_Plan = (props) => {
     const y0=500;
     const l=data.l;
     const WW=data.WW;
-    const WWm=scM(WW);
     const Dcon=30;
 
     const idIndex=useRef(1);
@@ -55,6 +54,8 @@ const SSTB_D_SVG_Plan = (props) => {
         const reducedDcon=Dcon-21;
         return eval(inp+"["+reducedDcon+"]");
     }
+
+    const HB=giveDcon("HBlock");
 
 
 
@@ -94,8 +95,12 @@ const SSTB_D_SVG_Plan = (props) => {
         return <path vectorEffect="non-scaling-stroke" d={p} style={{strokeWidth:sw+'%',stroke:sc,strokeDasharray:sd,fill:f}}/>
     }
 
-    const rect=(x,y,w,h,sw=0.5,sc="black",f="none")=>{
-        return <rect vectorEffect="non-scaling-stroke" x={x} y={y} width={w} height={h} style={{strokeWidth:sw+'%',stroke:sc,fill:f}} />
+    const rect=(x,y,w,h,sw=0.5,sc="black",sd="",f="none")=>{
+        return <rect vectorEffect="non-scaling-stroke" x={x} y={y} width={w} height={h} style={{strokeWidth:sw+'%',stroke:sc,strokeDasharray:sd,fill:f}} />
+    }
+
+    const rectp=(x1,y1,x2,y2,sw=0.5,sc="black",sd="",f="none")=>{
+        return <rect vectorEffect="non-scaling-stroke" x={x1} y={y1} width={x2-x1} height={y2-y1} style={{strokeWidth:sw+'%',stroke:sc,strokeDasharray:sd,fill:f}} />
     }
 
     const rect3=(x,y,w,h,p,sw=0.4,sc="black")=>{
@@ -137,7 +142,7 @@ const SSTB_D_SVG_Plan = (props) => {
                     <circle cx="0.2" cy="0.03" r="0.007%"/>
                 </pattern>
             </defs>,
-            rect(x,y,w,h,sw,sc,"url(#concrete)")
+            rect(x,y,w,h,sw,sc,"","url(#concrete)")
         ]
     }
     
@@ -158,18 +163,18 @@ const SSTB_D_SVG_Plan = (props) => {
         let AncLength=giveDcon("AncLength");
         let cable1_x1=scM(x0-40-200);
         let cable1D_x1=scM(x0-40-HBlock+AncLength+20);
-        let cable1D_x2=scM(x0-40-200-40);
-        let cable1_y1=scM(y0+yoffset-20);
+        let cable1D_x2=scM(x0-40-200-30);
+        let cable1_y1=scM(y0+yoffset-15);
         let rot="rotate(180,"+scM(x0+l*100/2)+","+cable1_y1+")";
 
         return [
             <g id="handRail">
                 <g id="handRailHalf">
-                    {rect3p(cable1D_x1-0.2,cable1_y1-0.2,cable1D_x2+0.2,cable1_y1+0.2,2,2,"black","0.1,0.1")},
-                    {path([["M",cable1D_x2+0.2,cable1_y1-0.2],["C",cable1D_x2+0.4,cable1_y1-0.1],["",cable1D_x2+0.4,cable1_y1+0.1],["",cable1D_x2+0.2,cable1_y1+0.2]],0.4,"black","0.1,0.1")},
+                    {rect3p(cable1D_x1-0.2,cable1_y1-0.1,cable1D_x2+0.2,cable1_y1+0.1,2,2,"black","0.1,0.1")},
+                    {path([["M",cable1D_x2+0.2,cable1_y1-0.1],["C",cable1D_x2+0.3,cable1_y1-0.05],["",cable1D_x2+0.3,cable1_y1+0.05],["",cable1D_x2+0.2,cable1_y1+0.1]],0.4,"black","0.1,0.1")},
                     {dLineP(cable1D_x1,cable1_y1,cable1D_x2,cable1_y1,scM(dia/10))},
-                    {concreteRect(scM(x0-40),cable1_y1-0.2,0.8,0.4)},
-                    {rect(scM(x0-20),cable1_y1-0.1,0.4,0.2,2,"black","white")},
+                    {concreteRect(scM(x0-30),cable1_y1-0.15,0.6,0.3)},
+                    {rect(scM(x0-15),cable1_y1-0.075,0.3,0.15,2,"black","","white")},
                     {lineP(cable1_x1,cable1_y1,scM(x0+l*100/2),cable1_y1,scM(dia/10))}
                 </g>
                 <use href="#handRailHalf" transform={rot} />
@@ -179,28 +184,43 @@ const SSTB_D_SVG_Plan = (props) => {
 
     }
 
+
     const mCable=(dia,len,n)=>{
+        let cables=[];
         let HBlock=giveDcon("HBlock");
         let AncLength=giveDcon("AncLength");
-        let cable1_x1=scM(x0+60);
+        let cable1_x1=scM(x0+30);
         let cable1D_x1=scM(x0-40-HBlock+AncLength+20);
-        let cable1D_x2=scM(x0+60);
+        let cable1D_x2=scM(x0+30);
         let cable1_y1=scM(y0);
-        let rot="rotate(180,"+scM(x0+l*100/2)+","+cable1_y1+")";
+        let rot="rotate(180,"+scM(x0+l*100/2)+","+(cable1_y1+0.85-(n)*0.1)+")";
+
+        for (let i=0;i<n;i++){
+            let cableD=dLineP(cable1D_x1,cable1_y1-i*0.1,cable1D_x2,cable1_y1-i*0.1,scM(dia/10));
+            cables.push(cableD);
+            let cableL=lineP(cable1_x1,cable1_y1-i*0.1,scM(x0+l*100/2),cable1_y1-i*0.1,scM(dia/10));
+            cables.push(cableL);
+        }
 
         return [
             <g id="mainCable">
+                {concreteRect(scM(x0-20),cable1_y1-(n)*0.1,0.5,2-0.3)}
                 <g id="mainCableHalf">
-                    {rect3p(cable1D_x1-0.2,cable1_y1-0.2,cable1D_x2+0.2,cable1_y1+0.2,2,2,"black","0.1,0.1")},
-                    {path([["M",cable1D_x2+0.2,cable1_y1-0.2],["C",cable1D_x2+0.4,cable1_y1-0.1],["",cable1D_x2+0.4,cable1_y1+0.1],["",cable1D_x2+0.2,cable1_y1+0.2]],0.4,"black","0.1,0.1")},
+                    {rectp(cable1D_x1-0.2,cable1_y1-(n)*0.1,cable1D_x2-0.5,cable1_y1+0.1,0.6,"black","0.1,0.1")},
+                    {rect(scM(x0-15),cable1_y1-(n)*0.1,0.3,(n+1)*0.1,2,"black","","white")},
+                    {cables},
+
                     {dLineP(cable1D_x1,cable1_y1,cable1D_x2,cable1_y1,scM(dia/10))},
-                    {concreteRect(scM(x0-40),cable1_y1-0.2,0.8,0.4)},
-                    {rect(scM(x0-20),cable1_y1-0.1,0.4,0.2,2,"black","white")},
+                    
                     {lineP(cable1_x1,cable1_y1,scM(x0+l*100/2),cable1_y1,scM(dia/10))}
                 </g>
-                <use href="#mainCableHalf" transform={rot} />
+                <use x={0} y={1.7-(n+1)*0.1} href="#mainCableHalf" />,
+                
             </g>,
-            <use x={0} y={2} href="#mainCable" />
+            <use href="#mainCable" transform={rot} />,
+            centerLine(scM(x0-HBlock-100),scM(y0-n*10+85),scM(x0+l*100+HBlock+100),scM(y0-n*10+85))
+
+            // <use x={0} y={2} href="#mainCable" />
         ]
 
     }
@@ -212,8 +232,8 @@ const SSTB_D_SVG_Plan = (props) => {
         const mainCableSize=cables[3];
         
         return [
-            hCable(handRailSize,l,-10*nMainCables),
-            // mCable(mainCableSize,l,nMainCables)
+            hCable(handRailSize,l,-10*nMainCables/2),
+            mCable(mainCableSize,l,nMainCables/2)
         ];
         
     }
@@ -229,17 +249,8 @@ const SSTB_D_SVG_Plan = (props) => {
             <button id="floatButton" onClick={refreshSVG} style={{position:"fixed",right:"70px",bottom:"10px"}}>R</button><br/><br/>
             <div id="test"></div>
             <svg onClick={line} id="SVGBridgePlan" width="200" height="50" viewBox="0 0 200 50" xmlns="http://www.w3.org/2000/svg" style={{width:sc,height:sc/r}}>
-                {/* <line vectorEffect="non-scaling-stroke" x1={x0} y1={y0} x2={x0+l} y2={y0} style={{strokeWidth:'1%',stroke:'black'}}/>
-                <line vectorEffect="non-scaling-stroke" x1={x0} y1={y0+WWm} x2={x0+l} y2={y0+WWm} style={{strokeWidth:'1%',stroke:'black'}}/>
-                <rect vectorEffect="non-scaling-stroke" x={x0-0.4} y={y0-0.15} width="0.4" height="0.3" style={{strokeWidth:'0.5%',stroke:"black",fill:'none'}} />
-                <rect vectorEffect="non-scaling-stroke" x={x0-0.4} y={y0+WWm-0.15} width="0.4" height="0.3" style={{strokeWidth:'0.5%',stroke:"black",fill:'none'}} />
-                <rect vectorEffect="non-scaling-stroke" x={x0+l} y={y0-0.15} width="0.4" height="0.3" style={{strokeWidth:'0.5%',stroke:"black",fill:'none'}} />
-                <rect vectorEffect="non-scaling-stroke" x={x0+l} y={y0+WWm-0.15} width="0.4" height="0.3" style={{strokeWidth:'0.5%',stroke:"black",fill:'none'}} /> */}
                 {drawCable(data.cables)}
-                {/* {centerLine(x0,y0+WWm/2,x0+l,y0+WWm/2)}
-                {drawCable(data.cables)}
-                {concreteRect(50,10,50,50)}
-                {brickRect(100,10,50,50)} */}
+                {console.log(2)}
 
             </svg>
             
