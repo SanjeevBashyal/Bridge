@@ -185,6 +185,10 @@ const SSTB_D = (props) => {
         let EA=110*Area;
         let i=1;
         let out=[];
+        let data={};
+        data.l=l;
+        data.WW=WW;
+        data.cables=cables;
         // console.log(EA);
         for(i=0;i<3;i++){
             let row={};
@@ -210,7 +214,7 @@ const SSTB_D = (props) => {
           );
 
         ReactDOM.render(
-            <SSTB_D_SVG_Plan l={l} WW={WW}/>,
+            <SSTB_D_SVG_Plan out={out} data={data}/>,
           document.getElementById("bridgeSvgPlan")
         );
 
