@@ -3,10 +3,16 @@ import './BridgeCalcShow.css'
 const BridgeCalcShow = (props) => {
     const designer=props.designer;
     const data=props.data;
-    console.log(designer);
+    const cData=props.cData;
+    console.log(data);
     return (
         <div className="calcShow">
-            <p>{designer}</p>
+            <br/>
+            <h1>{designer}</h1>
+            <h2>A. Cable Selection</h2>
+            <p>Main Cables: {cData.cables[2] +"  𝜙" + cData.cables[3]}<br/>
+            Handrail Cables: {cData.cables[0] +"  𝜙" + cData.cables[1]}</p>
+            <h2>B. Cable Geometry</h2>
             <table className="results" border="1px">
                 <tr>
                     <td>
@@ -153,8 +159,8 @@ const BridgeCalcShow = (props) => {
                 </tr>
                 
             </table>
-
-            <h3>Calculation of Sag for hoisting load (g)={data[1].g.toFixed(3)} kN/m</h3>
+            <h2>C. Cable Sag Calculation</h2>
+            <h4>Calculation of Sag for hoisting load (g)={data[1].g.toFixed(3)} kN/m</h4>
             <table border="1px">
             <tr>
                     <td>
@@ -176,7 +182,8 @@ const BridgeCalcShow = (props) => {
                 {data[1].biter[0].map(
                     (arr)=>(
                         <tr>
-                            {arr.map((ele)=>(
+                            <td>{arr[0].toFixed(0)}</td>
+                            {arr.slice(1).map((ele)=>(
                                 <td>{ele.toFixed(3)}</td>
                             )
 
@@ -210,7 +217,8 @@ const BridgeCalcShow = (props) => {
                 {data[2].biter[0].map(
                     (arr)=>(
                         <tr>
-                            {arr.map((ele)=>(
+                            <td>{arr[0].toFixed(0)}</td>
+                            {arr.slice(1).map((ele)=>(
                                 <td>{ele.toFixed(3)}</td>
                             )
 
@@ -220,6 +228,48 @@ const BridgeCalcShow = (props) => {
                     )
                 )}
 
+            </table>
+            <h2>D. Cable Profile</h2>
+            <table className="results" border="1px">
+                <tr>
+                    <td>
+                        X-Distance
+                    </td>
+                    <td>
+                        Dead Load Profile
+                    </td>
+                    <td>
+                        Hoisting Load Profile
+                    </td>
+                    <td>
+                        Full Load Profile
+                    </td>
+                </tr>
+                {
+                    Array.from({length: Math.floor((cData.l-0.001)/10+1)}, (v, i) => i).map((i)=>(
+                        <tr>
+                                 <td>{10*i}</td>
+                            {
+                                data.map((row)=>(
+                                    <td>{row.geometry[7][i]}</td>
+                                )
+
+                                )
+                            }
+                        </tr>
+                    )
+                    )
+                }
+                <tr>
+                            <td>{cData.l}</td>
+                    {
+                        data.map((row)=>(
+                            <td>{row.geometry[7][row.geometry[7].length-1]}</td>
+                        )
+
+                        )
+                    }
+                </tr>
             </table>
         </div>
       );

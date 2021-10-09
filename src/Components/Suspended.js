@@ -2,16 +2,12 @@ import React from 'react';
 import { useEffect} from 'react';
 import ReactDOM from 'react-dom';
 import BridgeCalcShow from './BridgeCalcShow';
-import SSTB_D_SVG_Plan from './SSTB_D_SVG_Plan';
+// import SSTB_D_SVG_Plan from './SSTB_D_SVG_Plan';
 
-const SSTB_D = (props) => {
+const Suspended = (props) => {
     const designer=props.designer;
     const AL=parseFloat(props.AL);
-    const AType=parseInt(props.AType);
-    const ATower=parseFloat(props.ATower);
     const BL=parseFloat(props.BL);
-    const BType=parseInt(props.BType);
-    const BTower=parseFloat(props.BTower);
     const l=parseFloat(props.l);
     const WW=parseInt(props.WW);
 
@@ -19,7 +15,7 @@ const SSTB_D = (props) => {
     
     useEffect(()=>{
         calculate(designer,AL,BL,l,WW);
-    },[]);
+    },[designer,AL,BL,l,WW]);
 
 
     const sagCalc=(EA,l,bd,h,gd,g,lf)=>{
@@ -57,7 +53,7 @@ const SSTB_D = (props) => {
         return l*(1+(8/3)*(b/l)**2+(1/2)*(h/l)**2);
     }
     
-    const geometryCalc=(b,h,l)=>{
+    const geometryCalc=(b,h,l,AL)=>{
         let A=(4*b)/(l**2);
         let B=(h-4*b)/l;
         let eA=(-B)/(2*A);
@@ -66,7 +62,16 @@ const SSTB_D = (props) => {
         let bB=bA-h;
         let thetaA=Math.atan((4*b-h)/l)*180/Math.PI;
         let thetaB=Math.atan((4*b+h)/l)*180/Math.PI;
-        return [A.toFixed(6)+"x^2"+B.toFixed(6)+"x",eA,eB,bA,bB,thetaA,thetaB];
+
+        let profile=[];
+        for(let i=0;i<(l-0.001);i=i+10){
+            let y=A*i**2+B*i+AL;
+            profile.push(y.toFixed(3));
+        }
+        let y=A*l**2+B*l+AL;
+        profile.push(y);
+
+        return [A.toFixed(7)+"x^2"+B.toFixed(7)+"x",eA,eB,bA,bB,thetaA,thetaB,profile];
 
     }
     const yCalc=(A,B,x)=>{
@@ -94,6 +99,64 @@ const SSTB_D = (props) => {
 
         return [DL,HL,FL];
 
+    }
+
+    const giveCableData=(hI,mI,n)=>{
+        let cS=[26,32,36,40];
+        let cP=[129,195,247,305];
+        let cT=[386,585,740,914];
+        let cW=[2.51,3.80,4.81,5.94];
+        let cA=[292,442,560,691];
+        let A=2*cA[hI]+n*cA[mI];
+        let P=2*cP[hI]+n*cP[mI];
+        let T=2*cT[hI]+n*cT[mI];
+        let W=2*cW[hI]+n*cW[mI];
+        return [2,cS[hI],n,cS[mI],W,A,T,P];
+    }
+
+    const cableEstimator=(TT)=>{
+        let cP=[129,195,247,305];
+        for (let i=0;i<2;i++){
+            for (let j=2;j<6;j+=2){
+                if((2*cP[0]+j*cP[i])>TT){
+                    return giveCableData(0,i,j);
+                }
+                if((2*cP[i]+j*cP[i])>TT){
+                    return giveCableData(i,i,j);
+                }
+            }
+        }
+
+
+        for (let i=2;i<3;i++){
+            for (let j=2;j<6;j+=2){
+                if((2*cP[i-1]+j*cP[i])>TT){
+                    return giveCableData(i-1,i,j);
+                }
+                if((2*cP[i]+j*cP[i])>TT){
+                    return giveCableData(i,i,j);
+                }
+            }
+        }
+
+        for (let i=3;i<4;i++){
+            for (let j=2;j<14;j+=2){
+                if((2*cP[i-1]+j*cP[i])>TT){
+                    return giveCableData(i-1,i,j);
+                }
+                if((2*cP[i]+j*cP[i])>TT){
+                    return giveCableData(i,i,j);
+                }
+            }
+        }
+    }
+
+    const loadEst=(l,b)=>{
+        let FL=4.3+50/l;
+        let H=(FL*(l**2))/(1.2*8*b);
+        let T=H/Math.cos(18/180*Math.PI);
+        console.log(H,T);
+        return T;
     }
 
     const tensionCalc=(g,l,b,theta)=>{
@@ -168,27 +231,40 @@ const SSTB_D = (props) => {
     const calculate=(designer,AL,BL,l,WW)=>{
         // let warnings=[];
         let b=null;
-        if(l<80){
-            b=l/20;
-        }else{
-            b=l/22;
-        }
+        let cables=null;
         let h=(BL-AL);
+        if(l<120){
+            if(l<80){
+                b=l/20;
+                
+            }else if(l>=80) {
+                b=l/22;
+            }
+            cables=cableIdentifier(WW,l);
+            let AB=areaCalc(cables);
+            cables[5]=AB[0];
+            cables[6]=AB[1];
+        }
+        else if(l>=120){
+            b=l/22-h/4;
+            let T=loadEst(l,b);
+            cables=cableEstimator(T);
+        }
         
-        let cables=cableIdentifier(WW,l);
+        
+        
         let HL=cables[4]*9.81/1000;
-        let AB=areaCalc(cables);
-        let Area=AB[0];
-        let PL=AB[1];
+        
         let LC=loadCalc(WW,HL,l);
         let lf=[0,1,2];
-        let EA=110*Area;
+        let EA=110*cables[5];
         let i=1;
         let out=[];
-        let data={};
-        data.l=l;
-        data.WW=WW;
-        data.cables=cables;
+        let cData={};
+        cData.h=h;
+        cData.l=l;
+        cData.WW=WW;
+        cData.cables=cables;
         // console.log(EA);
         for(i=0;i<3;i++){
             let row={};
@@ -196,7 +272,7 @@ const SSTB_D = (props) => {
             row.biter=sagCalc(EA,l,b,h,LC[0],LC[i],lf[i]);
             row.h=h;
             row.b=row.biter[1];
-            row.geometry=geometryCalc(row.b,h,l);
+            row.geometry=geometryCalc(row.b,h,l,AL);
             if(h>=0){
                 row.theta=row.geometry[6];
             }else{
@@ -204,19 +280,21 @@ const SSTB_D = (props) => {
             }
             row.g=LC[i];
             row.tension=tensionCalc(row.g,l,row.b,row.theta);
-            row.safety=PL/row.tension[1];
+            row.safety=cables[6]/row.tension[1];
             out.push(row);
         }
+
+
         // console.log(out);
         ReactDOM.render(
-              <BridgeCalcShow designer={designer} data={out} />,
+              <BridgeCalcShow designer={designer} data={out} cData={cData}/>,
             document.getElementById("bridgeCalcShow")
           );
 
-        ReactDOM.render(
-            <SSTB_D_SVG_Plan out={out} data={data}/>,
-          document.getElementById("bridgeSvgPlan")
-        );
+        // ReactDOM.render(
+        //     <SSTB_D_SVG_Plan out={out} data={data}/>,
+        //   document.getElementById("bridgeSvgPlan")
+        // );
 
 
 
@@ -231,4 +309,4 @@ const SSTB_D = (props) => {
       );
 }
  
-export default SSTB_D;
+export default Suspended;

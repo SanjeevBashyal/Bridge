@@ -248,7 +248,7 @@ const SSTB_D_SVG_Plan = (props) => {
             <button id="floatButton" onClick={()=>{scale(0)}} style={{position:"fixed",right:"40px",bottom:"10px"}}>−</button><br/><br/>
             <button id="floatButton" onClick={refreshSVG} style={{position:"fixed",right:"70px",bottom:"10px"}}>R</button><br/><br/>
             <div id="test"></div>
-            <svg onClick={line} id="SVGBridgePlan" width="200" height="50" viewBox="0 0 200 50" xmlns="http://www.w3.org/2000/svg" style={{width:sc,height:sc/r}}>
+            <svg id="SVGBridgePlan" width="200" height="50" viewBox="0 0 200 50" xmlns="http://www.w3.org/2000/svg" style={{width:sc,height:sc/r}}>
                 {drawCable(data.cables)}
                 {console.log(2)}
 
